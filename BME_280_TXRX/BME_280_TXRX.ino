@@ -82,10 +82,8 @@ void init_wifi_state() {
 
 void uart_communication()
 {
-        /* 交换TX/RX为GPIO15/13。 */
-        Serial.swap();
-        /* Serial.end(); */
 
+        /* 设置TX/RX为GPIO模式。 */
         /* 设置pinMode，似乎没用。 */
         /* pinMode(TX_Pin, FUNCTION_3); */
         /* pinMode(RX_Pin, FUNCTION_3); */
@@ -94,7 +92,7 @@ void uart_communication()
         digitalWrite(TX_Pin, HIGH);
         digitalWrite(RX_Pin, LOW);
 
-        delay(1000);
+        delay(100);
 
         Wire.begin();
         while(!bme.begin())
@@ -103,7 +101,7 @@ void uart_communication()
         }
 
         bme.chipModel();
-        delay(1000);
+        delay(100);
 
         /* switch(bme.chipModel()) */
         /* { */
@@ -121,9 +119,11 @@ void uart_communication()
         BME280::PresUnit presUnit(BME280::PresUnit_Pa);
         bme.read(pres, temp, hum, tempUnit, presUnit);
 
-        /* 使用TX/RX。 */
-        /* /\* pinMode(TX_Pin, FUNCTION_0); *\/ */
-        /* /\* pinMode(RX_Pin, FUNCTION_0); *\/ */
+        /* 设置TX/RX为UART模式。 */
+        /* 设置pinMode，似乎没用。 */
+        /* pinMode(TX_Pin, FUNCTION_0); */
+        /* pinMode(RX_Pin, FUNCTION_0); */
+
         /* pinMode(TX_Pin, OUTPUT); */
         /* pinMode(RX_Pin, INPUT); */
         /* SoftwareSerial esp8266 = SoftwareSerial(RX_Pin,TX_Pin); */
@@ -147,26 +147,28 @@ void uart_communication()
         /* esp8266.println(""); */
         /* /\* esp8266.end(); *\/ */
 
-        Serial.begin(115200);
-        /* 使用GPIO 15/13发送。 */
-        Serial.println("");
-        Serial.print("Sensor: ");
-        Serial.println(Sensor_name);
-        Serial.print("Temp: ");
-        Serial.print(temp);
-        /* Serial.print("°"+ String(tempUnit == BME280::TempUnit_Celsius ? 'C' :'F')); */
-        Serial.print(" Press: ");
-        Serial.print(pres);
-        /* Serial.println("Pa"); */
-        Serial.print(" Hum: ");
-        Serial.print(hum);
-        /* Serial.print("% RH"); */
-        /* Serial.print(" ALT: "); */
-        /* Serial.print(Bme.Alt); */
-        Serial.print(" Lux: ");
-        Serial.print(0);
-        Serial.println("");
-        /* esp8266.end(); */
+        /* 交换TX/RX为GPIO15/13。 */
+        /* Serial.swap(); */
+        /* Serial.end(); */
+        /* Serial.begin(115200); */
+        /* /\* 使用GPIO 15/13发送。 *\/ */
+        /* Serial.println(""); */
+        /* Serial.print("Sensor: "); */
+        /* Serial.println(Sensor_name); */
+        /* Serial.print("Temp: "); */
+        /* Serial.print(temp); */
+        /* /\* Serial.print("°"+ String(tempUnit == BME280::TempUnit_Celsius ? 'C' :'F')); *\/ */
+        /* Serial.print(" Press: "); */
+        /* Serial.print(pres); */
+        /* /\* Serial.println("Pa"); *\/ */
+        /* Serial.print(" Hum: "); */
+        /* Serial.print(hum); */
+        /* /\* Serial.print("% RH"); *\/ */
+        /* /\* Serial.print(" ALT: "); *\/ */
+        /* /\* Serial.print(Bme.Alt); *\/ */
+        /* Serial.print(" Lux: "); */
+        /* Serial.print(0); */
+        /* Serial.println(""); */
 
         /* 上传。 */
         if(WiFi.status()== WL_CONNECTED)

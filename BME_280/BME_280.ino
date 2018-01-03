@@ -14,6 +14,7 @@
   SDA (Serial Data)   ->  A4 on Uno/Pro-Mini, 20 on Mega2560/Due, 2 Leonardo/Pro-Micro
   SCK (Serial Clock)  ->  A5 on Uno/Pro-Mini, 21 on Mega2560/Due, 3 Leonardo/Pro-Micro
 */
+/* D1 mini上没有问题，esp8266上时而失效，放弃。 */
 
 #include <Wire.h>
 #include <EEPROM.h>
@@ -35,8 +36,6 @@ extern "C" {
 #define DBGLED(...)
 #endif /* _DBG */
 
-/* 对于ESP8266来说，顺序2045可行，5402不可行，推测0不可以作为SCL/SDA口，只能作为普通IO口。 */
-/* 对于D1 mini来说，两者都可以。推测是内部0口连线不同。 */
 int VCC_Pin = 2;
 int GND_Pin = 0;
 #define SCL 4
