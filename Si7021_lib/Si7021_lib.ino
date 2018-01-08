@@ -10,8 +10,8 @@
 
 SI7021 sensor;
 
-const char* ssid = "NETGEAR37";
-const char* password = "wwghmq2017";
+const char* ssid = "SSID";
+const char* password = "password";
 
 // ESP8266 Timer Example
 extern "C" {

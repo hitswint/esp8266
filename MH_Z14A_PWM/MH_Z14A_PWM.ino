@@ -4,8 +4,8 @@
 int CO2; // co2 variable
 int pin_CO2 = 13;
 
-const char* ssid = "NETGEAR37";
-const char* password = "wwghmq2017";
+const char* ssid = "SSID";
+const char* password = "password";
 
 
 // ESP8266 Timer Example

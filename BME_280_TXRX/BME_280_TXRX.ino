@@ -17,19 +17,30 @@
 /* 此库无法修改SCL/SDA，必须连接到5/4管脚。 */
 /* 使用TX/RX作为Vcc/Gnd驱动BME280，但导致无法UART无法flash。 */
 
-#include <SoftwareSerial.h>
+/* #include <SoftwareSerial.h> */
 #include <BME280I2C.h>
 #include <Wire.h>
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
+/* ArduinoOTA */
+/* #include <ESP8266mDNS.h> */
+/* #include <WiFiUdp.h> */
+/* #include <ArduinoOTA.h> */
+
+/* HttpUpdate OTA */
+#include <ESP8266httpUpdate.h>
+
 /* #define SCL 5 */
 /* #define SDA 4 */
 int TX_Pin = 1;
 int RX_Pin = 3;
 
-const char* ssid = "SJZU";
+const int FW_VERSION = 18010812;
+const char* fwUrlBase = "http://202.199.66.23/";
+
+const char* ssid = "changlang";
 /* const char* password = ""; */
 int num_seconds_to_sleep = 600;
 char Sensor_name[]="GY_39_2801";
@@ -78,6 +89,58 @@ void init_wifi_state() {
                 s.connect_state = CONNECT_STATE_PREPARE;
                 put_wifi_state(&s);
         }
+}
+
+void checkForUpdates()
+{
+        String fwURL = String( fwUrlBase );
+        fwURL.concat( "Fota/" );
+        fwURL.concat( Sensor_name );
+        String fwVersionURL = fwURL;
+        fwVersionURL.concat( ".version" );
+
+        /* Serial.print( "Firmware: " ); */
+        /* Serial.println( fwVersionURL ); */
+
+        HTTPClient httpClient;
+        httpClient.begin( fwVersionURL );
+        int httpCode = httpClient.GET();
+        if( httpCode == 200 ) {
+                String newFWVersion = httpClient.getString();
+
+                /* Serial.print( "Curr: " ); */
+                /* Serial.println( FW_VERSION ); */
+                /* Serial.print( "Available: " ); */
+                /* Serial.println( newFWVersion ); */
+
+                int newVersion = newFWVersion.toInt();
+
+                if( newVersion > FW_VERSION ) {
+                        /* Serial.println( "update" ); */
+
+                        String fwImageURL = fwURL;
+                        fwImageURL.concat( ".bin" );
+                        t_httpUpdate_return ret = ESPhttpUpdate.update( fwImageURL );
+
+                        /* switch(ret) { */
+                        /* case HTTP_UPDATE_FAILED: */
+                        /*         Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str()); */
+                        /*         break; */
+
+                        /* case HTTP_UPDATE_NO_UPDATES: */
+                        /*         Serial.println("HTTP_UPDATE_NO_UPDATES"); */
+                        /*         break; */
+                        /* } */
+                }
+                /* else { */
+                /*         Serial.println( "Already on latest version" ); */
+                /* } */
+        }
+        /* else { */
+        /*         Serial.print( "Check failed, got HTTP response code " ); */
+        /*         Serial.println( httpCode ); */
+        /* } */
+        httpClient.end();
 }
 
 void uart_communication()
@@ -183,7 +246,7 @@ void uart_communication()
                 String value_sent;
                 HTTPClient http;    //Declare object of class HTTPClient
 
-                http.begin("http://47.94.151.140/"); //Specify request destination
+                http.begin(fwUrlBase); //Specify request destination
                 /* http.addHeader("Content-Type", "text/plain"); //Specify content-type header */
                 http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -218,6 +281,31 @@ void uart_communication()
         }
 }
 
+/* ArduinoOTA */
+/* void Arduino_ota_update() */
+/* { */
+/*         ArduinoOTA.setPassword((const char *)"hitswint"); */
+/*         ArduinoOTA.onStart([]() { */
+/*                         Serial.println("Start"); */
+/*                 }); */
+/*         ArduinoOTA.onEnd([]() { */
+/*                         Serial.println("\nEnd"); */
+/*                 }); */
+/*         ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) { */
+/*                         Serial.printf("Progress: %u%%\r", (progress / (total / 100))); */
+/*                 }); */
+/*         ArduinoOTA.onError([](ota_error_t error) { */
+/*                         Serial.printf("Error[%u]: ", error); */
+/*                         if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed"); */
+/*                         else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed"); */
+/*                         else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed"); */
+/*                         else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed"); */
+/*                         else if (error == OTA_END_ERROR) Serial.println("End Failed"); */
+/*                 }); */
+/*         ArduinoOTA.begin(); */
+/*         ArduinoOTA.handle(); */
+/* } */
+
 void setup() {
         EEPROM.begin(512);
         init_wifi_state();
@@ -249,7 +337,7 @@ void loop() {
                         WiFi.begin(ssid);
 
                         while ( WiFi.status() != WL_CONNECTED) {
-                                Serial.print(".");
+                                /* Serial.print("."); */
                                 delay(100);
                         }
 
@@ -260,9 +348,18 @@ void loop() {
 
         case CONNECT_STATE_CONNECTED: {
                 /* Serial.println("We're connected, do something with wifi.."); */
+                /* delay(100); */
+
+                /* ArduinoOTA */
+                /* Arduino_ota_update(); */
+
                 delay(100);
 
                 uart_communication();
+
+                delay(100);
+
+                checkForUpdates();
 
                 delay(100);
 

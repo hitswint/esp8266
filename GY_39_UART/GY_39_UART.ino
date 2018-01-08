@@ -1,12 +1,15 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
+
+const int FW_VERSION = 18010812;
+const char* fwUrlBase = "http://202.199.66.23/";
 
 const char* ssid = "SJZU";
 /* const char* password = ""; */
 
 int num_seconds_to_sleep = 600;
-
 char Sensor_name[]="GY_39_07";
 int Sensor_vcc_pin = 5;
 int Sensor_gnd_pin = 4;
@@ -68,6 +71,58 @@ void init_wifi_state() {
                 s.connect_state = CONNECT_STATE_PREPARE;
                 put_wifi_state(&s);
         }
+}
+
+void checkForUpdates()
+{
+        String fwURL = String( fwUrlBase );
+        fwURL.concat( "Fota/" );
+        fwURL.concat( Sensor_name );
+        String fwVersionURL = fwURL;
+        fwVersionURL.concat( ".version" );
+
+        /* Serial.print( "Firmware: " ); */
+        /* Serial.println( fwVersionURL ); */
+
+        HTTPClient httpClient;
+        httpClient.begin( fwVersionURL );
+        int httpCode = httpClient.GET();
+        if( httpCode == 200 ) {
+                String newFWVersion = httpClient.getString();
+
+                /* Serial.print( "Curr: " ); */
+                /* Serial.println( FW_VERSION ); */
+                /* Serial.print( "Available: " ); */
+                /* Serial.println( newFWVersion ); */
+
+                int newVersion = newFWVersion.toInt();
+
+                if( newVersion > FW_VERSION ) {
+                        /* Serial.println( "update" ); */
+
+                        String fwImageURL = fwURL;
+                        fwImageURL.concat( ".bin" );
+                        t_httpUpdate_return ret = ESPhttpUpdate.update( fwImageURL );
+
+                        /* switch(ret) { */
+                        /* case HTTP_UPDATE_FAILED: */
+                        /*         Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str()); */
+                        /*         break; */
+
+                        /* case HTTP_UPDATE_NO_UPDATES: */
+                        /*         Serial.println("HTTP_UPDATE_NO_UPDATES"); */
+                        /*         break; */
+                        /* } */
+                }
+                /* else { */
+                /*         Serial.println( "Already on latest version" ); */
+                /* } */
+        }
+        /* else { */
+        /*         Serial.print( "Check failed, got HTTP response code " ); */
+        /*         Serial.println( httpCode ); */
+        /* } */
+        httpClient.end();
 }
 
 void serialEvent() {
@@ -148,20 +203,20 @@ void uart_communication()
         /* Bme.Alt=(Re_buf_bme[12]<<8)|Re_buf_bme[13]; */
         Lux=(Re_buf_max[4]<<24)|(Re_buf_max[5]<<16)|(Re_buf_max[6]<<8)|Re_buf_max[7];
 
-        Serial.println("");
-        Serial.print("Sensor: ");
-        Serial.println(Sensor_name);
-        Serial.print("Temp: ");
-        Serial.print( (float)Bme.Temp/100);
-        Serial.print(" Press: ");
-        Serial.print( ((float)Bme.P)/100);
-        Serial.print(" Hum: ");
-        Serial.print( (float)Bme.Hum/100);
-        /* Serial.print(" ALT: "); */
-        /* Serial.print(Bme.Alt); */
-        Serial.print(" Lux: ");
-        Serial.print((float)Lux/100);
-        Serial.println("");
+        /* Serial.println(""); */
+        /* Serial.print("Sensor: "); */
+        /* Serial.println(Sensor_name); */
+        /* Serial.print("Temp: "); */
+        /* Serial.print( (float)Bme.Temp/100); */
+        /* Serial.print(" Press: "); */
+        /* Serial.print( ((float)Bme.P)/100); */
+        /* Serial.print(" Hum: "); */
+        /* Serial.print( (float)Bme.Hum/100); */
+        /* /\* Serial.print(" ALT: "); *\/ */
+        /* /\* Serial.print(Bme.Alt); *\/ */
+        /* Serial.print(" Lux: "); */
+        /* Serial.print((float)Lux/100); */
+        /* Serial.println(""); */
 
         sign_max=0;
         sign_bme=0;
@@ -181,7 +236,7 @@ void http_post()
                 String value_sent;
                 HTTPClient http;    //Declare object of class HTTPClient
 
-                http.begin("http://47.94.151.140/"); //Specify request destination
+                http.begin(fwUrlBase); //Specify request destination
                 /* http.addHeader("Content-Type", "text/plain"); //Specify content-type header */
                 http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -262,7 +317,7 @@ void loop() {
                         WiFi.begin(ssid);
 
                         while ( WiFi.status() != WL_CONNECTED) {
-                                Serial.print(".");
+                                /* Serial.print("."); */
                                 delay(100);
                         }
 
@@ -282,6 +337,10 @@ void loop() {
 
                 uart_communication();
                 http_post();
+
+                delay(100);
+
+                checkForUpdates();
 
                 delay(100);
 

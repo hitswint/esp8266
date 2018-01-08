@@ -3,8 +3,8 @@
 #include <ESP8266WiFi.h>
 #include <EEPROM.h>
 
-const char* ssid     = "NETGEAR37";
-const char* password = "wwghmq2017";
+const char* ssid     = "SSID";
+const char* password = "password";
 
 #define CONNECT_STATE_PREPARE 0
 #define CONNECT_STATE_CONNECTING 1

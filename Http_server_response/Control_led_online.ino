@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>
-const char* ssid = "NETGEAR37";//记得修改为你家的wifi名字密码。
-const char* password = "wwghmq2017";
+const char* ssid = "SSID";//记得修改为你家的wifi名字密码。
+const char* password = "password";
 int ledPin = 12; // GPIO13
 WiFiServer server(80);
 void setup() {

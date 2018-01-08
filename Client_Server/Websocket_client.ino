@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <WebSocketClient.h>
 
-const char* ssid     = "NETGEAR37";
-const char* password = "wwghmq2017";
+const char* ssid     = "SSID";
+const char* password = "password";
 
 char path[] = "/websocket";
 char host[] = "192.168.1.102";

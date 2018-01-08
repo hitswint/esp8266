@@ -14,8 +14,8 @@ DallasTemperature sensors(&oneWire);
 
 int ledPin = 12;
 
-const char* ssid = "NETGEAR37";
-const char* password = "wwghmq2017";
+const char* ssid = "SSID";
+const char* password = "password";
 
 int num_seconds_to_sleep = 60;
 
