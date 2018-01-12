@@ -2,10 +2,13 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 /* 改变mac地址。https://yoursunny.com/t/2017/change-ESP8266-MAC/ */
-#include "ChangeMac.hpp"
+/* #include "ChangeMac.hpp" */
+extern "C" {
+#include <user_interface.h>
+}
 
-const char* ssid     = "......";
-const char* password = "......";
+const char* ssid     = "SJZU";
+/* const char* password = "......"; */
 
 bool captiveLogin() {
         static const char* LOCATION = "Location";
@@ -20,12 +23,12 @@ bool captiveLogin() {
                 http.begin("http://captive.apple.com/");
                 http.collectHeaders(HEADER_NAMES, 2);
                 int httpCode = http.GET();
-                /* if (httpCode == 200) { */
-                /*         return true; */
-                /* } */
-                /* if (httpCode != 302 || !http.hasHeader(LOCATION)) { */
-                /*         return false; */
-                /* } */
+                if (httpCode == 200) {
+                        return true;
+                }
+                if (httpCode != 302 || !http.hasHeader(LOCATION)) {
+                        return false;
+                }
                 uri = http.header(LOCATION);
                 Serial.print("portal=");
                 Serial.println(uri);
@@ -78,21 +81,21 @@ bool captiveLogin() {
                 delay(500);
         }
 
-        /* { */
-        /*         HTTPClient http; */
-        /*         http.begin("http://captive.apple.com/"); */
-        /*         int httpCode = http.GET(); */
-        /*         if (httpCode == 200) { */
-        /*                 return true; */
-        /*         } */
-        /* } */
+        {
+                HTTPClient http;
+                http.begin("http://captive.apple.com/");
+                int httpCode = http.GET();
+                if (httpCode == 200) {
+                        return true;
+                }
+        }
 
-        /* { */
-        /*         HTTPClient http; */
-        /*         http.begin("http://portquiz.net:8080/"); */
-        /*         int httpCode = http.GET(); */
-        /*         return httpCode == 200; */
-        /* } */
+        {
+                HTTPClient http;
+                http.begin("http://portquiz.net:8080/");
+                int httpCode = http.GET();
+                return httpCode == 200;
+        }
 }
 
 void setup() {
@@ -103,27 +106,28 @@ void setup() {
         WiFi.mode(WIFI_STA);
         WiFi.persistent(false);
 
-        /* 不改变mac地址。 */
-        /* uint8_t mac[6]; */
+        /* 改变mac地址。 */
+        uint8_t mac[] = {0x9C, 0xC1, 0x72, 0xCA, 0x0F, 0x92};
         /* makeRandomMac(mac); */
         /* changeMac(mac); */
+        wifi_set_macaddr(STATION_IF, &mac[0]);
         Serial.print("MAC address is ");
         Serial.println(WiFi.macAddress());
 
-        String hostname = "GY39-";
+        /* 更改hostname。 */
+        /* String hostname = "GY39"; */
         /* 随机hostname。 */
         /* hostname += random(10); */
         /* hostname += random(10); */
         /* hostname += random(10); */
         /* hostname += random(10); */
-        WiFi.hostname(hostname);
-
-        Serial.print("Hostname is ");
-        Serial.println(hostname);
+        /* WiFi.hostname(hostname); */
+        /* Serial.print("Hostname is "); */
+        /* Serial.println(hostname); */
 
         Serial.print("Connecting to ");
         Serial.println(ssid);
-        WiFi.begin(ssid, password);
+        WiFi.begin(ssid);
         while (WiFi.status() != WL_CONNECTED) {
                 delay(500);
                 Serial.print(WiFi.status());
