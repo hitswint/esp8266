@@ -334,7 +334,8 @@ void loop() {
                 // as stated in a number of blogs, this is necessary to
                 // make the module activate RF again. But it's a mode of sleep
                 // and will continue in setup()
-                ESP.deepSleep(1, WAKE_RF_DEFAULT);
+                /* ESP.deepSleep(1, xxx)会导致无法进行到下步，推测由芯片运行频率导致。 */
+                ESP.deepSleep(0.5 * 1000000, WAKE_RF_DEFAULT);
         } break;
 
         case CONNECT_STATE_CONNECTING: {
