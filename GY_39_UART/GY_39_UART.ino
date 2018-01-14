@@ -1,15 +1,18 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+/* ESPhttpUpdate需flash空间足够大，BOARD不能设置为generic，需为espino。*/
 #include <ESP8266httpUpdate.h>
 
-const int FW_VERSION = 18010812;
-const char* fwUrlBase = "http://202.199.66.23/";
+const int FW_VERSION = 18011324;
+const char* fwUrlBase = "http://47.94.151.140/";
 
-const char* ssid = "SJZU";
+/* const char* ssid = "SJZU"; */
 /* const char* password = ""; */
+const char* ssid = "NETGEAR37";
+const char* password = "wwghmq2017";
 
-int num_seconds_to_sleep = 600;
+int num_seconds_to_sleep = 10;
 char Sensor_name[]="GY_39_07";
 int Sensor_vcc_pin = 5;
 int Sensor_gnd_pin = 4;
@@ -111,6 +114,10 @@ void checkForUpdates()
 
                         /* case HTTP_UPDATE_NO_UPDATES: */
                         /*         Serial.println("HTTP_UPDATE_NO_UPDATES"); */
+                        /*         break; */
+
+                        /* case HTTP_UPDATE_OK: */
+                        /*         serial.println("HTTP_UPDATE_OK"); */
                         /*         break; */
                         /* } */
                 }
@@ -236,7 +243,8 @@ void http_post()
                 String value_sent;
                 HTTPClient http;    //Declare object of class HTTPClient
 
-                http.begin(fwUrlBase); //Specify request destination
+                String fwUrlUpload = String( fwUrlBase );
+                http.begin(fwUrlUpload); //Specify request destination
                 /* http.addHeader("Content-Type", "text/plain"); //Specify content-type header */
                 http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -314,7 +322,7 @@ void loop() {
         case CONNECT_STATE_CONNECTING: {
                 if ( WiFi.status() != WL_CONNECTED) {
                         WiFi.mode(WIFI_STA);
-                        WiFi.begin(ssid);
+                        WiFi.begin(ssid, password);
 
                         while ( WiFi.status() != WL_CONNECTED) {
                                 /* Serial.print("."); */

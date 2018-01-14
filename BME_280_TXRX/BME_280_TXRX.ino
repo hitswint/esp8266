@@ -30,6 +30,7 @@
 /* #include <ArduinoOTA.h> */
 
 /* HttpUpdate OTA */
+/* ESPhttpUpdate需flash空间足够大，BOARD不能设置为generic，需为espino。*/
 #include <ESP8266httpUpdate.h>
 
 /* #define SCL 5 */
@@ -129,6 +130,10 @@ void checkForUpdates()
 
                         /* case HTTP_UPDATE_NO_UPDATES: */
                         /*         Serial.println("HTTP_UPDATE_NO_UPDATES"); */
+                        /*         break; */
+
+                        /* case HTTP_UPDATE_OK: */
+                        /*         serial.println("HTTP_UPDATE_OK"); */
                         /*         break; */
                         /* } */
                 }
@@ -246,7 +251,8 @@ void uart_communication()
                 String value_sent;
                 HTTPClient http;    //Declare object of class HTTPClient
 
-                http.begin(fwUrlBase); //Specify request destination
+                String fwUrlUpload = String( fwUrlBase );
+                http.begin(fwUrlUpload); //Specify request destination
                 /* http.addHeader("Content-Type", "text/plain"); //Specify content-type header */
                 http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
