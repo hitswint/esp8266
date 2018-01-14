@@ -7,13 +7,11 @@
 const int FW_VERSION = 18011324;
 const char* fwUrlBase = "http://47.94.151.140/";
 
-/* const char* ssid = "SJZU"; */
+const char* ssid = "SJZU";
 /* const char* password = ""; */
-const char* ssid = "NETGEAR37";
-const char* password = "wwghmq2017";
 
-int num_seconds_to_sleep = 10;
-char Sensor_name[]="GY_39_07";
+int num_seconds_to_sleep = 600;
+char Sensor_name[]="GY_39_01";
 int Sensor_vcc_pin = 5;
 int Sensor_gnd_pin = 4;
 
@@ -322,7 +320,7 @@ void loop() {
         case CONNECT_STATE_CONNECTING: {
                 if ( WiFi.status() != WL_CONNECTED) {
                         WiFi.mode(WIFI_STA);
-                        WiFi.begin(ssid, password);
+                        WiFi.begin(ssid);
 
                         while ( WiFi.status() != WL_CONNECTED) {
                                 /* Serial.print("."); */

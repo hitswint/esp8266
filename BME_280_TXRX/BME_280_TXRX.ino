@@ -38,10 +38,10 @@
 int TX_Pin = 1;
 int RX_Pin = 3;
 
-const int FW_VERSION = 18010812;
-const char* fwUrlBase = "http://202.199.66.23/";
+const int FW_VERSION = 18011324;
+const char* fwUrlBase = "http://47.94.151.140/";
 
-const char* ssid = "changlang";
+const char* ssid = "SJZU";
 /* const char* password = ""; */
 int num_seconds_to_sleep = 600;
 char Sensor_name[]="GY_39_2801";
