@@ -33,6 +33,12 @@
 /* ESPhttpUpdate需flash空间足够大，BOARD不能设置为generic，需为espino。*/
 #include <ESP8266httpUpdate.h>
 
+// 加入定时中断，避免陷入死循环。
+extern "C" {
+#include "user_interface.h"
+}
+os_timer_t myTimer;
+
 /* #define SCL 5 */
 /* #define SDA 4 */
 int TX_Pin = 1;
@@ -312,7 +318,21 @@ void uart_communication()
 /*         ArduinoOTA.handle(); */
 /* } */
 
+void timerCallback(void *pArg) {
+        struct wifi_state_retain_s s;
+        s.initializer = 0b01010101;
+        s.connect_state = CONNECT_STATE_PREPARE;
+        put_wifi_state(&s);
+        ESP.deepSleep(num_seconds_to_sleep * 1000000, RF_DISABLED);
+}
+
+void timer_init(void) {
+        os_timer_setfn(&myTimer, timerCallback, NULL);
+        os_timer_arm(&myTimer, 60000, false);
+}
+
 void setup() {
+        timer_init();
         EEPROM.begin(512);
         init_wifi_state();
         // turn off Wifi and disable features we do not want.
@@ -374,6 +394,7 @@ void loop() {
                 /* Serial.println(num_seconds_to_sleep); */
                 s.connect_state = CONNECT_STATE_PREPARE;
                 put_wifi_state(&s);
+                /* ESP.deepSleep重启后重新运行setup/loop。 */
                 ESP.deepSleep(num_seconds_to_sleep * 1000000, RF_DISABLED);
         } break;
         }

@@ -4,6 +4,12 @@
 /* ESPhttpUpdate需flash空间足够大，BOARD不能设置为generic，需为espino。*/
 #include <ESP8266httpUpdate.h>
 
+// 加入定时中断，避免陷入死循环。
+extern "C" {
+#include "user_interface.h"
+}
+os_timer_t myTimer;
+
 const int FW_VERSION = 18011324;
 const char* fwUrlBase = "http://47.94.151.140/";
 
@@ -277,7 +283,22 @@ void http_post()
         }
 }
 
+void timerCallback(void *pArg) {
+        struct wifi_state_retain_s s;
+        s.initializer = 0b01010101;
+        s.connect_state = CONNECT_STATE_PREPARE;
+        put_wifi_state(&s);
+        ESP.deepSleep(num_seconds_to_sleep * 1000000, RF_DISABLED);
+}
+
+void timer_init(void) {
+        os_timer_setfn(&myTimer, timerCallback, NULL);
+        os_timer_arm(&myTimer, 60000, false);
+}
+
 void setup() {
+        timer_init();
+
         Serial.begin(9600);
         delay(10);
 
@@ -296,7 +317,6 @@ void setup() {
         WiFi.stopSmartConfig();
 
         pinMode(16, WAKEUP_PULLUP);
-
 
         /* Serial.write(0XA5); */
         /* Serial.write(0X03);    //初始化,连续输出模式 */
@@ -355,6 +375,7 @@ void loop() {
                 /* Serial.println(num_seconds_to_sleep); */
                 s.connect_state = CONNECT_STATE_PREPARE;
                 put_wifi_state(&s);
+                /* ESP.deepSleep重启后重新运行setup/loop。 */
                 ESP.deepSleep(num_seconds_to_sleep * 1000000, RF_DISABLED);
         } break;
         }
